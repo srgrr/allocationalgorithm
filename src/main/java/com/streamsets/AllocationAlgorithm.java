@@ -34,5 +34,5 @@ public class AllocationAlgorithm {
   public AllocationAlgorithm() {
 
   }
-  
+
 }
