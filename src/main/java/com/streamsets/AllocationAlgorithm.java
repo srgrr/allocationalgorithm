@@ -17,8 +17,11 @@
 package com.streamsets;
 
 import java.util.List;
+import java.util.Random;
 
 public class AllocationAlgorithm {
+
+  private final Random random = new Random();
 
   /**
    * Select an instance from a list using the weights as probabilities. So, if the input is a list of instance with
@@ -28,11 +31,35 @@ public class AllocationAlgorithm {
    * @return Instance or null
    */
   public Instance selectInstance(List<Instance> instances) {
+    if(!instances.isEmpty()) {
+      int sumOfWeights = instances.stream().mapToInt(Instance::getWeight).sum();
+      int chosenNumber = getRandomPositiveNumber() % sumOfWeights + 1;
+      int currentWeight = 1;
+      for(Instance instance: instances) {
+        int nextWeight = currentWeight + instance.getWeight();
+        if(chosenNumber >= currentWeight && chosenNumber < nextWeight) {
+          return instance;
+        }
+        currentWeight = nextWeight;
+      }
+    }
     return null;
+  }
+
+  int getRandomPositiveNumber() {
+    return Math.abs(random.nextInt());
   }
 
   public AllocationAlgorithm() {
 
+  }
+
+  /**
+   * Returns the random number generator object of the algorithm
+   * @return Random
+   */
+  public Random getRandom() {
+    return random;
   }
 
 }

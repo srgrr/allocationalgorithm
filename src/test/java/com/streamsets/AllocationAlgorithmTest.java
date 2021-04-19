@@ -15,10 +15,15 @@
  */
 package com.streamsets;
 
+import org.junit.Assert;
 import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 public class AllocationAlgorithmTest {
@@ -32,7 +37,20 @@ public class AllocationAlgorithmTest {
 
   @Test
   public void testAllocationAlgorithm() {
-
+    AllocationAlgorithm allocationAlgorithm = Mockito.spy(new AllocationAlgorithm());
+    Map<Instance, Integer> empiricalObservations = new HashMap<>();
+    int sumOfShares = instances.stream().mapToInt(Instance::getWeight).sum();
+    for(int i = 1; i <= sumOfShares; ++i) {
+      Mockito.when(allocationAlgorithm.getRandomPositiveNumber()).thenReturn(i);
+      Instance chosenInstance = allocationAlgorithm.selectInstance(instances);
+      empiricalObservations.put(
+          chosenInstance,
+          empiricalObservations.getOrDefault(chosenInstance, 0) + 1
+      );
+    }
+    for(Instance instance: instances) {
+      Assert.assertEquals(instance.getWeight(), (int) empiricalObservations.get(instance));
+    }
   }
 
 }
